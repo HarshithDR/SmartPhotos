@@ -1,5 +1,6 @@
 import streamlit as st
 from auth import authenticate  # Import the authentication function
+from PIL import Image
 
 # Streamlit page configuration
 st.set_page_config(page_title="Smart Photos", page_icon="📸", layout="centered")
@@ -60,17 +61,57 @@ st.markdown('<div class="title">Smart Photos</div>', unsafe_allow_html=True)
 # st.image("logosmart.png", width=70)  # Adjust width as needed
 st.markdown('</div>', unsafe_allow_html=True)
 
+# Initialize session state
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+
 # User ID and Password input fields
-user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
-password = st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
+if not st.session_state.authenticated:
+    user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
+    password = st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
 
-# Button click handler
-if st.button("Sign In"):
-    if authenticate(user_id, password):
-        st.success("Signed in successfully!")
-    else:
-        st.error("Invalid User ID or Password")
+    # Button click handler
+    if st.button("Sign In"):
+        if authenticate(user_id, password):
+            st.session_state.authenticated = True
+            st.experimental_rerun()
+        else:
+            st.error("Invalid User ID or Password")
 
-# Sign-up button
-if st.button("Sign Up"):
-    st.info("Sign-up functionality is not implemented yet.")
+    # Sign-up button
+    if st.button("Sign Up"):
+        st.info("Sign-up functionality is not implemented yet.")
+else:
+    # Sidebar with upload and search buttons
+    st.sidebar.title("Options")
+    uploaded_files = st.sidebar.file_uploader("Upload Photos", accept_multiple_files=True)
+    search_query = st.sidebar.text_input("Search with AI")
+
+    # Main content area
+    st.title("Photo Gallery")
+
+    def display_images(files):
+        cols = st.columns(3)  # Create 3 columns for the photos
+        for idx, file in enumerate(files):
+            try:
+                image = Image.open(file)
+                image = image.resize((300, 300))  # Resize image to 300x300 pixels
+                col = cols[idx % 3]  # Cycle through the columns
+                col.image(image, use_column_width=True, caption=f"Photo {len(files) - idx}")
+            except (IOError, OSError) as e:
+                st.error(f"Error loading image {file.name}: {e}")
+
+    if uploaded_files:
+        st.write("### Uploaded Photos")
+        display_images(uploaded_files[::-1])  # Display images with the latest uploaded first
+
+    if search_query:
+        st.write(f"### Search Results for: {search_query}")
+        # Here you would implement the AI search functionality
+        # For now, let's just display a placeholder
+        st.image("https://via.placeholder.com/300", caption="Sample Search Result 1")
+        st.image("https://via.placeholder.com/300", caption="Sample Search Result 2")
+        st.image("https://via.placeholder.com/300", caption="Sample Search Result 3")
+
+    if not uploaded_files and not search_query:
+        st.write("Upload photos or use the AI search to display images here.")
