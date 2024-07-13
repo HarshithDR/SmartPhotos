@@ -1,4 +1,5 @@
 import streamlit as st
+from auth import authenticate  # Import the authentication function
 
 # Streamlit page configuration
 st.set_page_config(page_title="Smart Photos", page_icon="📸", layout="centered")
@@ -56,21 +57,20 @@ st.markdown("""
 # Page layout with title and logo
 st.markdown('<div class="header">', unsafe_allow_html=True)
 st.markdown('<div class="title">Smart Photos</div>', unsafe_allow_html=True)
-st.image("logosmart.png", width=70)  # Adjust width as needed
+# st.image("logosmart.png", width=70)  # Adjust width as needed
 st.markdown('</div>', unsafe_allow_html=True)
 
 # User ID and Password input fields
-st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
-st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
+user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
+password = st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
 
-# Sign-in and Sign-up buttons side by side
-st.markdown("""
-    <div class="button-container">
-        <div>
-            <button class="button" id="signin_button">Sign In</button>
-        </div>
-        <div>
-            <button class="button" id="signup_button">Sign Up</button>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+# Button click handler
+if st.button("Sign In"):
+    if authenticate(user_id, password):
+        st.success("Signed in successfully!")
+    else:
+        st.error("Invalid User ID or Password")
+
+# Sign-up button
+if st.button("Sign Up"):
+    st.info("Sign-up functionality is not implemented yet.")
