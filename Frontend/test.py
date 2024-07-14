@@ -1,11 +1,12 @@
 import streamlit as st
 from pymongo import MongoClient
 import bcrypt
+from PIL import Image
 
-# MongoDB connection setup
-client = MongoClient("mongodb://localhost:27017/")
-db = client["smart_photos"]
-users_collection = db["users"]
+# Connect to MongoDB
+url = "mongodb+srv://amithdeeplearningworkshop:mucgz8JjD5ynz40A@cluster0.gzsu9lm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+client = MongoClient(url)
+db = client.ImageDB
 
 # Streamlit page configuration
 st.set_page_config(page_title="Smart Photos", page_icon="📸", layout="centered")
@@ -69,17 +70,16 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Initialize session state
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
-if 'signup' not in st.session_state:
-    st.session_state.signup = False
 
 # User ID and Password input fields
-if not st.session_state.authenticated and not st.session_state.signup:
+if not st.session_state.authenticated:
     user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
     password = st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
 
     # Button click handler
     if st.button("Sign In"):
-        if authenticate(user_id, password):
+        user = db.Users.find_one({"username": user_id})
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
             st.session_state.authenticated = True
             st.experimental_rerun()
         else:
@@ -87,32 +87,7 @@ if not st.session_state.authenticated and not st.session_state.signup:
 
     # Sign-up button
     if st.button("Sign Up"):
-        st.session_state.signup = True
-        st.experimental_rerun()
-
-elif st.session_state.signup:
-    st.write("## Sign Up")
-
-    new_user_id = st.text_input("New User ID", key="new_user_id", placeholder="Enter your new User ID", type="default")
-    new_password = st.text_input("New Password", key="new_password", placeholder="Enter your new Password", type="password")
-    confirm_password = st.text_input("Confirm Password", key="confirm_password", placeholder="Confirm your Password", type="password")
-
-    if st.button("Submit"):
-        if new_password == confirm_password:
-            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-            try:
-                users_collection.insert_one({"user_id": new_user_id, "password": hashed_password})
-                st.success("Sign-up successful! Please sign in.")
-                st.session_state.signup = False
-                st.experimental_rerun()
-            except Exception as e:
-                st.error(f"Error signing up: {e}")
-        else:
-            st.error("Passwords do not match.")
-
-    if st.button("Cancel"):
-        st.session_state.signup = False
-        st.experimental_rerun()
+        st.info("Sign-up functionality is not implemented yet.")
 
 else:
     # Sidebar with upload and search buttons

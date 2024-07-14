@@ -1,6 +1,12 @@
 import streamlit as st
-from auth import authenticate  # Import the authentication function
+from pymongo import MongoClient
+import bcrypt
 from PIL import Image
+
+# Connect to MongoDB
+url = "mongodb+srv://amithdeeplearningworkshop:mucgz8JjD5ynz40A@cluster0.gzsu9lm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+client = MongoClient(url)
+db = client.ImageDB
 
 # Streamlit page configuration
 st.set_page_config(page_title="Smart Photos", page_icon="📸", layout="centered")
@@ -72,7 +78,8 @@ if not st.session_state.authenticated:
 
     # Button click handler
     if st.button("Sign In"):
-        if authenticate(user_id, password):
+        user = db.Users.find_one({"username": user_id})
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
             st.session_state.authenticated = True
             st.experimental_rerun()
         else:
@@ -81,6 +88,7 @@ if not st.session_state.authenticated:
     # Sign-up button
     if st.button("Sign Up"):
         st.info("Sign-up functionality is not implemented yet.")
+
 else:
     # Sidebar with upload and search buttons
     st.sidebar.title("Options")
