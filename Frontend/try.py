@@ -13,24 +13,39 @@ db = client.ImageDB
 st.set_page_config(page_title="Smart Photos", page_icon="📸", layout="centered")
 
 def create_user(username, password):
-    # Check if user already exists
-    if db.Users.find_one({"username": username}):
+    try:
+        # Check if user already exists
+        if db.Users.find_one({"username": username}):
+            return None
+        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        user_id = db.Users.insert_one({"username": username, "password": hashed}).inserted_id
+        return user_id
+    except Exception as e:
+        st.error(f"Error creating user: {e}")
         return None
-    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    user_id = db.Users.insert_one({"username": username, "password": hashed}).inserted_id
-    return user_id
 
 def check_user(username, password):
-    user = db.Users.find_one({"username": username})
-    if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
-        return user['_id']
-    return None
+    try:
+        user = db.Users.find_one({"username": username})
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+            return user['_id']
+        return None
+    except Exception as e:
+        st.error(f"Error checking user: {e}")
+        return None
 
 def upload_image(user_id, image):
-    db.Images.insert_one({"user_id": user_id, "image": image})
+    try:
+        db.Images.insert_one({"user_id": user_id, "image": image})
+    except Exception as e:
+        st.error(f"Error uploading image: {e}")
 
 def get_user_images(user_id):
-    return db.Images.find({"user_id": user_id})
+    try:
+        return db.Images.find({"user_id": user_id})
+    except Exception as e:
+        st.error(f"Error fetching images: {e}")
+        return []
 
 # CSS styles for the page
 st.markdown("""
@@ -132,12 +147,10 @@ if not st.session_state.authenticated:
             if user_id:
                 st.session_state['logged_in'] = user_id
                 st.success("Logged in successfully!")
-                st.success("Sign-in successful!")
                 st.session_state.authenticated = True
                 st.experimental_rerun()
             else:
                 st.error("Login failed. Check your username and/or password.")
-                st.error("Sign-in failed!")
 
     # Sign-up button
     with button2:
@@ -199,4 +212,3 @@ else:
 
     if not uploaded_file and not search_query and not user_images:
         st.write("Upload photos or use the AI search to display images here.")
-
