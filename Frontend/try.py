@@ -6,7 +6,7 @@ import io
 
 # Connect to MongoDB
 url = "mongodb+srv://sohanmahadev:Sohan%40123@cluster0.gachc3t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-client = MongoClient(url)
+client = MongoClient(url, tlsAllowInvalidCertificates=True)
 db = client.ImageDB
 
 # Streamlit page configuration
@@ -105,7 +105,6 @@ if not st.session_state.authenticated:
     user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
     password = st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
 
-
     st.columns(1)
     _, button2, button3, _ = st.columns(4)
     button_style = '''
@@ -200,3 +199,4 @@ else:
 
     if not uploaded_file and not search_query and not user_images:
         st.write("Upload photos or use the AI search to display images here.")
+
