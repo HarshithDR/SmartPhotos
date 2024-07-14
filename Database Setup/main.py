@@ -2,7 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 import bcrypt
 
-uri = "mongodb+srv://amithdeeplearningworkshop:mucgz8JjD5ynz40A@cluster0.gzsu9lm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+uri = "mongodb+srv://amithdeeplearningworkshop:mucgz8JjD5ynz40A@cluster0.gzsu9lm.mongodb.net/ImageDB?retryWrites=true&w=majority&appName=Cluster0"
 # Connect to MongoDB
 client = MongoClient(uri)
 db = client.ImageDB
