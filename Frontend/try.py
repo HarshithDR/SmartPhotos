@@ -161,24 +161,16 @@ if not st.session_state.authenticated:
             else:
                 st.error("Username already exists. Try a different username.")
 else:
-    # Sidebar with upload and search buttons
+    # Sidebar with upload button
     st.sidebar.title("Options")
     uploaded_file = st.sidebar.file_uploader("Choose an image")
 
     if uploaded_file is not None:
-        upload_button = st.sidebar.button("Upload Image")
-        if upload_button:
+        if st.sidebar.button("Upload Image"):
             upload_image(st.session_state['logged_in'], uploaded_file.read())
             st.sidebar.empty()  # Clear the file uploader
             st.success("Image uploaded!")
-
-    user_images = get_user_images(st.session_state['logged_in'])
-    if user_images:
-        st.sidebar.title("Uploaded Images")
-        for image_data in user_images:
-            img = Image.open(io.BytesIO(image_data['image']))
-            st.sidebar.image(img, use_column_width=True)
-            st.sidebar.markdown("---")
+            st.experimental_rerun()  # Rerun the app to update the image gallery
 
     search_query = st.sidebar.text_input("Search with AI")
 
