@@ -128,7 +128,7 @@ if not st.session_state.authenticated:
     # logo
     c1,c2,c3 = st.columns(3)
     with c2:
-        st.image('/Frontend/l.png',width=300)
+        st.image('https://github.com/HarshithDR/SmartPhotos/blob/master/Frontend/l.png',width=300)
 
     # User ID and Password input fields
     user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
