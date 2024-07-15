@@ -3,14 +3,23 @@ from pymongo import MongoClient
 import bcrypt
 from PIL import Image
 import io
-
+import requests
+import time
 # Connect to MongoDB
 url = "mongodb+srv://sohanmahadev:Sohan%40123@cluster0.gachc3t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 client = MongoClient(url, tlsAllowInvalidCertificates=True)
 db = client.ImageDB
 
+
+if 'data' not in st.session_state:
+    st.session_state.data = {}
+
 # Streamlit page configuration
 st.set_page_config(page_title="Smart Photos", page_icon="📸", layout="centered")
+
+if 'new_id' not in st.session_state:
+    st.session_state.new_id = {}
+
 
 def create_user(username, password):
     try:
@@ -19,6 +28,9 @@ def create_user(username, password):
             return None
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         user_id = db.Users.insert_one({"username": username, "password": hashed}).inserted_id
+
+
+
         return user_id
     except Exception as e:
         st.error(f"Error creating user: {e}")
@@ -122,6 +134,12 @@ if not st.session_state.authenticated:
     user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")
     password = st.text_input("Password", key="password", placeholder="Enter your Password", type="password")
 
+
+    st.session_state.data = {
+        "user_id": user_id,
+        "password": password
+    }
+
     st.columns(1)
     _, button2, button3, _ = st.columns(4)
     button_style = '''
@@ -160,6 +178,10 @@ if not st.session_state.authenticated:
         if st.button("Sign Up", key="sign_up"):
             if create_user(user_id, password):
                 st.success("You have successfully created an account! You can login now.")
+                st.session_state.new_id = {
+                    "user_id": user_id
+                }
+
             else:
                 st.error("Username already exists. Try a different username.")
 else:
@@ -169,14 +191,39 @@ else:
 
     if uploaded_file is not None:
         if st.sidebar.button("Upload Image"):
+            url_backend = 'http://127.0.0.1:5000/process_images'
+
+
+
+
             upload_image(st.session_state['logged_in'], uploaded_file.read())
             st.sidebar.empty()  # Clear the file uploader
             st.success("Image uploaded!")
+            # Make the POST request
+            requests.post(url_backend, json=st.session_state.data)
+            print(st.session_state.data)
             st.experimental_rerun()  # Rerun the app to update the image gallery
 
     search_query = st.sidebar.text_input("Search with AI")
+    if search_query:
+        url_backend_chat = 'http://127.0.0.1:5000/chat_query'
+        time.sleep(5)
+        st.sidebar.text('Here is the car image you are searching for')
 
-    # Main content area
+        # Initialize a new session state variable by copying the existing data
+        if 'data_sent' not in st.session_state:
+            st.session_state.data_sent = dict(st.session_state.data)  # Create a copy of the data
+
+        # Append the query to the new session state variable
+        st.session_state.data_sent['query'] = search_query
+        
+
+        # Send the updated data dictionary via POST request
+        requests.post(url_backend_chat, json=st.session_state.data_sent)
+
+
+
+        # Main content area
     st.title("Photo Gallery")
 
     def display_images(files):
@@ -195,9 +242,9 @@ else:
         st.write(f"### Search Results for: {search_query}")
         # Here you would implement the AI search functionality
         # For now, let's just display a placeholder
-        st.image("https://via.placeholder.com/300", caption="Sample Search Result 1")
-        st.image("https://via.placeholder.com/300", caption="Sample Search Result 2")
-        st.image("https://via.placeholder.com/300", caption="Sample Search Result 3")
+        # st.image("https://via.placeholder.com/300", caption="Sample Search Result 1")
+        # st.image("https://via.placeholder.com/300", caption="Sample Search Result 2")
+        # st.image("https://via.placeholder.com/300", caption="Sample Search Result 3")
 
     user_images = list(get_user_images(st.session_state['logged_in']))
     if user_images:

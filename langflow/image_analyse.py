@@ -8,7 +8,7 @@ google_api = os.getenv('Google_api')
 genai.configure(api_key= google_api)
 
 # Main function to describe the image
-def image_describer(image_id):
+def image_describer(image_id,message):
     image_data = db.get_image_from_mongodb(image_id)
     generation_config = {
         "temperature": 0.2,
@@ -26,7 +26,7 @@ def image_describer(image_id):
 
     prompt_parts = [
         genai.upload_file(image_file_path),
-        "Describe the image in one paragraph and also give me keywords"
+        message
     ]
 
     response = model.generate_content(prompt_parts)
