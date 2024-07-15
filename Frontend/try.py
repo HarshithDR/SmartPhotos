@@ -36,7 +36,7 @@ def check_user(username, password):
 
 def upload_image(user_id, image):
     try:
-        db.Images.insert_one({"user_id": user_id, "image": image})
+        db.Images.insert_one({"user_id": user_id, "image": image,'tags':''})
     except Exception as e:
         st.error(f"Error uploading image: {e}")
 
@@ -114,7 +114,9 @@ if 'authenticated' not in st.session_state:
 # User ID and Password input fields
 if not st.session_state.authenticated:
     # logo
-    st.image('logosmart.png')
+    c1,c2,c3 = st.columns(3)
+    with c2:
+        st.image('l.png',width=300)
 
     # User ID and Password input fields
     user_id = st.text_input("User ID", key="user_id", placeholder="Enter your User ID", type="default")

@@ -1,22 +1,22 @@
 from flask import Flask, request, jsonify
+import db
+import flow
 
 app = Flask(__name__)
 
-@app.route('/userid_details', methods=['GET', 'POST'])
-def userid_details():
-    if request.method == 'POST':
-        if request.is_json:
-            data = request.get_json()
-            user_id = data.get('userid')
-        else:
-            user_id = request.form.get('userid')
-    else:
-        user_id = request.args.get('userid')
-    
+
+@app.route('/process_images', methods=['POST'])
+def process_images():
+    req_data = request.get_json()
+
+    # Check if username and password are correct
+    username, password = req_data['username'], req_data['password']
+    user_id = db.check_user(username,password)
     if user_id:
-        return jsonify({'User ID': user_id})
+        flow.run_image_describe(user_id)
+        return jsonify({'message': 'Login successful on backend'}), 200
     else:
-        return jsonify({'error': 'No User ID provided'}), 400
+        return jsonify({'error': 'Invalid credentials found on backend'}), 401
 
 if __name__ == '__main__':
     app.run(debug=True)
