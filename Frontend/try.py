@@ -207,8 +207,8 @@ else:
     search_query = st.sidebar.text_input("Search with AI")
     if search_query:
         url_backend_chat = 'http://127.0.0.1:5000/chat_query'
-        time.sleep(5)
-        st.sidebar.text('Here is the car image you are searching for')
+        # time.sleep(5)
+        # st.sidebar.text('Here is the car image you are searching for')
 
         # Initialize a new session state variable by copying the existing data
         if 'data_sent' not in st.session_state:
@@ -220,8 +220,6 @@ else:
 
         # Send the updated data dictionary via POST request
         requests.post(url_backend_chat, json=st.session_state.data_sent)
-
-
 
         # Main content area
     st.title("Photo Gallery")

@@ -17,7 +17,7 @@ def extract_keywords(text):
     return []
   
 def add_image_id(response,image_id):
-    return response+'\n image_id = ',image_id
+    return response ,'\n image_id = ',image_id
     
 def run_image_describe(username, userid): 
     image_list = db.empty_tags_id_extractor(userid)
