@@ -12,6 +12,7 @@ def process_images():
     # Check if username and password are correct
     username, password = req_data['user_id'], req_data['password']
     user_id = db.check_user(username,password)
+    print(user_id)
     if user_id:
         flow.run_image_describe(req_data['user_id'],user_id)
         return jsonify({'message': 'Login successful on backend'}), 200
@@ -24,7 +25,7 @@ def chat_query(): #accepts {query,username,password}
     data = request.get_json()
     user_id = db.check_user(data['user_id'],data['password'])
     
-    [ai_response ,image_id] = flow.query_flow(data['user_id'],user_id, data['query'])
+    ai_response ,image_id = flow.query_flow(data['user_id'],user_id, data['query'])
     if image_id:
         return jsonify({'message':"success","ai_response":ai_response,"image_id":image_id})
     else:

@@ -17,7 +17,7 @@ def extract_keywords(text):
     return []
   
 def add_image_id(response,image_id):
-    return response ,'\n image_id = ',image_id
+    return response + ' image_id = '+ image_id
     
 def run_image_describe(username, userid): 
     image_list = db.empty_tags_id_extractor(userid)
@@ -34,14 +34,16 @@ def run_image_describe(username, userid):
             ## extract keywords from response and update to db
             keywords_list = extract_keywords(response.text)
             print('keywords updated to db = ',db.update_tags_in_db(image_id,keywords_list))
-            
-            final_image_describe_text = add_image_id(response,image_id)
+            print(type(response.text))
+            final_image_describe_text = add_image_id(response.text,image_id)
+            print(type(final_image_describe_text))
+            print('hi - ',final_image_describe_text)
             
             #store it in vector
-            if username not in vector_db.check_collections:
+            if username not in vector_db.check_collections():
                 print('collection creating')
                 vector_db.create_collection(username)
-                vector_db.insert_text(username,final_image_describe_text)
+                vector_db.insert_text(username,{'$vectorize' :final_image_describe_text})
             else:
                 print(32342342)
                 vector_db.insert_text(username,{'$vectorize' :final_image_describe_text})
@@ -70,4 +72,4 @@ def query_flow(username,user_id,query):
     message = f"From the image extract the information for the following question {query}"
     ai_response = image_analyse.image_describer(image_id,message)
     
-    return [ai_response,query]
+    return ai_response.text,image_id

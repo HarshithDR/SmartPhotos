@@ -28,7 +28,7 @@ def create_collection(collection_name):
         provider="openai",
         model_name="text-embedding-3-small",
         authentication={
-            "providerKey": "key",
+            "providerKey": "key1",
         },
     ),
     )
